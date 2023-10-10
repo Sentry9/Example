@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  loans-applications-service:
+    networks:
+      - dcs-bank
+    build:
+      context: ./Loans.Application
+      dockerfile: Dockerfile
+    volumes:
+      - ./loans-application/appsettings.json:/app/appsettings.json
+    ports:
+      - 2023:80
+  api-gateway-service:
+    networks:
+      - dcs-bank
+    depends_on:
+      - loans-applications-service
+    image: nickholas/dcs-api-gateway:latest
+    volumes:
+      - ./api-gateway-service/appsettings.json:/app/appsettings.json
+    ports:
+      - 2100:2100
+  decision-maker-service:
+    networks:
+      - dcs-bank
+    image: nickholas/dcs-decision-maker-service:latest
+    volumes:
+      - ./decision-maker-service/appsettings.json:/app/appsettings.json
+  emailing-service:
+    networks:
+      - dcs-bank
+    image: nickholas/dcs-emailing-service:latest
+    volumes:
+      - ./emailing-service/appsettings.json:/app/appsettings.json
+networks:
+  dcs-bank:
+    driver: bridge
